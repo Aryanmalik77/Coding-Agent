@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Secrets & Config
+.env
+.flaskenv
+secrets.json
+
+# Logs & Output (Selective)
+*.log
+verification_output.txt
+verification_results.txt
+verification_log.txt
+topic_research_results.txt
+lpg_research_results.txt
+lpg_research_result.txt
+autonomous_results.txt
+research_output.txt
+web_verification_results.txt
+logging_verification_results.txt
+reports/
+
+# Databases
+*.sqlite
+*.lmdb/
+coding_agent_state.lmdb/
+coding_agent_graph.kuzu/
+
+# Data Directories (Root only)
+/coding_agent workspace/
+/coding agent workspace/
+/repo_workspace/
+/autonomous_entities/
+/fortress/
+.fortress_context/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+.checkpoints/
