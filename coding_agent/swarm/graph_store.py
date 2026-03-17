@@ -25,7 +25,7 @@ class GraphStore:
     sqlite_conn: Optional[sqlite3.Connection] = None
 
     def __init__(self, workspace: Path, db_name: str = "coding_agent_graph.kuzu"):
-        self.db_path = workspace / db_name
+        self.db_path = Path(workspace) / db_name
         os.makedirs(self.db_path, exist_ok=True)
         
         self.kuzu_db = None
@@ -40,9 +40,9 @@ class GraphStore:
                 logger.debug("Initialized KuzuDB at {}", self.db_path)
             except Exception as e:
                 logger.error("Failed to initialize KuzuDB: {}. Falling back to SQLite.", e)
-                self._init_sqlite_fallback(workspace / "coding_agent_graph.sqlite")
+                self._init_sqlite_fallback(Path(workspace) / "coding_agent_graph.sqlite")
         else:
-            self._init_sqlite_fallback(workspace / "coding_agent_graph.sqlite")
+            self._init_sqlite_fallback(Path(workspace) / "coding_agent_graph.sqlite")
 
     def _init_kuzu_schema(self):
         k_conn = self.kuzu_conn

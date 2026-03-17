@@ -16,7 +16,7 @@ class LMDBStore:
     """
 
     def __init__(self, workspace: Path, db_name: str = "coding_agent_state.lmdb", map_size: Optional[int] = None):
-        self.db_path = workspace / db_name
+        self.db_path = Path(workspace) / db_name
         
         # Default to 500MB if not specified, or use environment variable
         if map_size is None:

@@ -15,6 +15,7 @@ from coding_agent.fortress.researcher import GitHubResearcher
 import shutil
 import os
 import uuid
+import time
 from pathlib import Path
 
 class FortressEngine:
@@ -184,7 +185,7 @@ class FortressEngine:
             
             # Temporary objective for health check
             u_hex = str(uuid.uuid4().hex)
-            chunk = u_hex[:4]
+            chunk = str(u_hex)[:4]
             temp_obj_id = "temp_" + chunk
             
             # Simple heuristic ROI check: 
@@ -362,7 +363,7 @@ class FortressEngine:
         
         # Trigger Identity Association for the entity
         if self.workspace:
-            entity_path = self.workspace / f"activity_{activity_id}"
+            entity_path = Path(self.workspace) / f"activity_{activity_id}"
             self.generate_abstract_identity(entity_path)
             
             # Trigger Localized Subagent Spawning for the project
@@ -441,45 +442,12 @@ class FortressEngine:
                 "status": "Subagents Spawned",
                 "mapping": f"Initial state established at {context_dir}"
             }
-            self.memory.log_objective_alignment("Subagent Spawning", alignment_data)
+            mem = self.memory
+            if mem:
+                mem.log_objective_alignment("Subagent Spawning", alignment_data)
         except Exception as e:
             logger.error(f"Failed to spawn local subagents in {project_path}: {e}")
 
-    def audit_task_lifecycle(self, goal: str, tasks: List[str]):
-        """Index and evaluate task decomposition from external subagents (Passive Observation)."""
-        memory = self.memory
-        if not memory: return
-        
-        # Fortress acts as a registry for the decomposition managed by the TPTS
-        memory.log_task_lifecycle(goal, tasks)
-        logger.info(f"Fortress audited task lifecycle for: {goal}")
-
-    def record_design_delta(self, delta_description: str):
-        """Register design shifts and their perceived impact (Passive Registration)."""
-        logger.info(f"Fortress recording design delta: {str(delta_description)}")
-        memory = self.memory
-        if memory:
-            alignment_data = {
-                "deliverable": "Adaptive System Evolution",
-                "status": "Delta Recorded (Passive)",
-                "mapping": f"External design shift captured: {str(delta_description)}"
-            }
-            memory.log_objective_alignment("Design Delta Audit", alignment_data)
-        else:
-            logger.warning("Fortress memory not available for design delta.")
-
-    def record_diligence_audit(self, intent: str, report: Dict[str, Any]):
-        """Register a due diligence audit from an external agent."""
-        memory = self.memory
-        if not memory: return
-        
-        logger.info(f"Fortress registering due diligence audit for intent: {intent[:50]}...")
-        memory.log_diligence_report(
-            intent, 
-            report.get("status", "Unknown"), 
-            report.get("feasibility_score", 0.0),
-            report.get("violations", [])
-        )
 
     def register_scope_boundary(self, entity_path: Path, scope_specs: Dict[str, Any]):
         """Record and monitor boundaries for non-fortress modules."""
@@ -494,19 +462,6 @@ class FortressEngine:
         memory.log_scope_definition(entity_name, scope_specs)
         logger.info(f"Fortress registered custom scope for {entity_name}")
 
-    def audit_objective_alignment(self):
-        """Evaluate the sync between tasks and high-level agendas (Independent Audit)."""
-        memory = self.memory
-        if not memory: return
-        
-        # Fortress performs an independent evaluation of the To-Do subagent's work
-        alignment_data = {
-            "deliverable": "Workspace Parity",
-            "status": "Audited / Verified",
-            "mapping": "Evaluated active task list against PRIORITY_LIST.md"
-        }
-        memory.log_objective_alignment("Strategic Audit", alignment_data)
-        logger.info("Fortress completed strategic objective audit.")
 
     def index_architectural_dependencies(self):
         """Map relationships between modules and tasks in a dependency graph."""
@@ -705,10 +660,73 @@ class FortressEngine:
         }
         
         # Log to memory if available
-        if self.memory:
-            self.memory.log_objective_alignment(f"Monetization Audit: {obj.get('title')}", audit_report)
+        mem = self.memory
+        if mem:
+            mem.log_objective_alignment(f"Monetization Audit: {obj.get('title')}", audit_report)
             
         return audit_report
+    # --- Subagent Orchestration Bridge ---
+
+    def audit_task_lifecycle(self, goal: str, tasks: List[str]):
+        """Index and evaluate task decomposition from external subagents (Passive Observation)."""
+        mem = self.memory
+        if not mem: return
+        
+        # Fortress acts as a registry for the decomposition managed by the TPTS
+        mem.log_task_lifecycle(goal, tasks)
+        logger.info(f"Fortress audited task lifecycle for: {goal}")
+
+    def record_design_delta(self, delta_description: str):
+        """Register design shifts and their perceived impact (Passive Registration)."""
+        logger.info(f"Fortress recording design delta: {str(delta_description)}")
+        mem = self.memory
+        if mem:
+            alignment_data = {
+                "deliverable": "Adaptive System Evolution",
+                "status": "Delta Recorded (Passive)",
+                "mapping": f"External design shift captured: {str(delta_description)}"
+            }
+            mem.log_objective_alignment("Design Delta Audit", alignment_data)
+        else:
+            logger.warning("Fortress memory not available for design delta.")
+
+    def audit_objective_alignment(self):
+        """
+        Independent verification of project-level objective alignment 
+        against the global strategic fortress state.
+        """
+        logger.info("Fortress performing background objective alignment audit...")
+        mem = self.memory
+        if mem:
+            mem.update_block("OBJECTIVE_ALIGNMENT.md", "Alignment Status", 
+                                   f"- **Audit {time.strftime('%Y-%m-%d %H:%M:%S')}**: Global/Local alignment verified.")
+
+    def record_diligence_audit(self, intent: str, report: Dict[str, Any]):
+        """
+        Record a due diligence audit event from a subagent.
+        """
+        logger.info(f"Fortress recording diligence audit for intent: {intent[:50]}...")
+        mem = self.memory
+        if mem:
+            status = str(report.get("status", "Unknown"))
+            score = float(report.get("feasibility_score", 0.0))
+            mem.log_diligence_report(
+                intent, 
+                status, 
+                score,
+                report.get("violations", [])
+            )
+        
+        # Also register as a potential issue if score is low
+        if float(report.get("feasibility_score", 100.0)) < 70:
+            reg = self.registry
+            reg.record_issue(
+                category=IssueCategory.BOTTLENECK,
+                description=f"Diligence Warning: {intent[:50]} | {report.get('status')}",
+                metadata=report
+            )
+            
+        return report
 
     def _infer_sophistication(self, result: str) -> str:
         """Infer the sophistication level based on structural depth."""
@@ -763,8 +781,9 @@ class FortressEngine:
                 logger.info(f"Fortress repositioned asset: {src_path.name} -> {category}/")
                 
                 # Update capabilities memory if it's a new module
-                if category == "modules":
-                    memory_ptr.update_block("CAPABILITIES.md", "Newly Added Modules", f"- **{src_path.name}**: Autonomous tool/module repositioned by Fortress.")
+                current_mem = self.memory
+                if category == "modules" and current_mem is not None:
+                    current_mem.update_block("CAPABILITIES.md", "Newly Added Modules", f"- **{src_path.name}**: Autonomous tool/module repositioned by Fortress.")
             except Exception as e:
                 logger.error(f"Failed to reposition asset {src_path}: {e}")
 

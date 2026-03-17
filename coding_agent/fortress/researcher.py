@@ -14,7 +14,7 @@ class GitHubResearcher:
     """
 
     def __init__(self, workspace_path: Path):
-        self.workspace = workspace_path / "repo_workspace"
+        self.workspace = Path(workspace_path) / "repo_workspace"
         self.workspace.mkdir(parents=True, exist_ok=True)
         self.history_file = self.workspace / "research_history.json"
         self.history = self._load_history()
